@@ -6,8 +6,6 @@ name = "pypi"
 [packages]
 pandas = "*"
 biopython = "*"
-pytest = "*"
-flask = "*"
 
 [dev-packages]
 

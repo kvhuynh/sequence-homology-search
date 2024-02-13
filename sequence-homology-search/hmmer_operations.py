@@ -27,10 +27,13 @@ Args:
 Returns:
   None
 """
-def hmmsearch(i: int, hmm_file: str) -> None:
-    command: str = f"hmmsearch -E 0.001 --tblout ./run_{i}.txt ../hmm_folder/{hmm_file} ../eukprot_combined.fasta";
-    print(f"Searching {hmm_file} against EukProt...")
-    subprocess.run(command, shell=True);
+def hmm_search(i: int, hmm_file: str, path_to_database: str) -> None:
+    # command: str = f"hmmsearch -E 0.001 --tblout ./run_{i}.txt ../hmm_folder/{hmm_file} ../eukprot_combined.fasta";
+    # print(f"Searching {hmm_file} against EukProt...")
+    # subprocess.run(command, shell=True);
+    pass;
+    
+
 
 """
 Parses results of hmm_search (hmmsearch)
@@ -92,20 +95,38 @@ def hmmbuild(i: int) -> str:
     print(f"Creating a new hmm file...");
     command: str = f"hmmbuild ../hmm_folder/iteration_{i}.hmm aligned_iter_{i}.txt"
     subprocess.run(command, shell=True);
-    return f"iteration_{i}.hmm"
+    return f"iteration_{i}.hmm";
 
-if __name__ == "__main__":
-    current_hmm_file = "PF04055.hmm";
-    i: int = 1;
-    while i < 6:
-        make_folder(i);
-        hmmsearch(i, current_hmm_file);
-        parsed_hmm: dict = parse_hmm_search(i);
-        extract_protein_from_fasta(parsed_hmm, i);
-        hmmalign(i, current_hmm_file);
-        current_hmm_file: str = hmmbuild(i);
+def create_combined_fasta() -> None:
+    
+    pass;
+
+def hmm_search_main(number_of_iterations: int, hmm_file: str, job_name: str) -> None:
+    os.chdir("./utilities");
+    if not os.path.exists("./TCS"):
+        print("DATABASE NOT FOUND. PLEASE DOWNLOAD DATABASE FROM: https://figshare.com/articles/dataset/TCS_tar_gz/21586065 AND EXTRACT INTO THE UTILITIES FOLDER.");
+        exit();
+    else:
+        if not os.path.isfile("./combined_eukprot.fasta"):
+            print("Combined eukprot file not found. Creating one...");
+            create_combined_fasta();
         os.chdir("../");
-        i += 1;
 
+    os.chdir("./output");
+    os.mkdir(job_name);
+    os.chdir(f"./{job_name}");
+    current_hmm_file = hmm_file;
+    iteration: int = 1;
+    while iteration <= 2:
+        make_folder(iteration);
+        # hmm_search(iteration, current_hmm_file, path_to_database);
+        # parsed_hmm: dict = parse_hmm_search(i);
+        # extract_protein_from_fasta(parsed_hmm, i);
+        # hmmalign(i, current_hmm_file);
+        # current_hmm_file: str = hmmbuild(i);
+        print(os.getcwd());
+        os.chdir("../");
+        print(os.getcwd());
+        iteration += 1;
 
     
