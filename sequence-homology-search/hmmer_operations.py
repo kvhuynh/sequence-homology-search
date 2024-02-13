@@ -112,6 +112,9 @@ def hmm_search_main(number_of_iterations: int, hmm_file: str, job_name: str) -> 
             create_combined_fasta();
         os.chdir("../");
 
+
+    if not os.path.exists("./output"):
+        os.mkdir("output");
     os.chdir("./output");
     os.mkdir(job_name);
     os.chdir(f"./{job_name}");
