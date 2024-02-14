@@ -128,7 +128,7 @@ def main():
      
     parser.add_argument("-d", "--database", type = str,
                         default = None,
-                        help = "This version only supports the EukProt database. Due to it's large size, user download is required. Download link: https://figshare.com/articles/dataset/TCS_tar_gz/21586065. Extract database into the utilities folder.")
+                        help = "This version only supports the EukProt database. Due to it's large size, user download is required. Download link: https://figshare.com/articles/dataset/TCS_tar_gz/21586065. Extract database into the databases folder.")
 
  
     # parse the arguments from standard input

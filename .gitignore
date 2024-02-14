@@ -1,4 +1,5 @@
 __pycache__/
 *.hmm
 *.DS_Store
-/sequence-homo-logy-search/TCS/
+/sequence-homology-search/utilities/TCS/
+/sequence-homology-search/output/

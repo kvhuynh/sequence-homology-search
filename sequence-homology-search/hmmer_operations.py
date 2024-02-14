@@ -1,6 +1,7 @@
 import os;
 import csv;
 import subprocess;
+import shutil;
 from Bio import SearchIO;
 from Bio import SeqIO;
 
@@ -12,8 +13,8 @@ Args:
 Returns:
   None
 """
-def make_folder(i: int) -> None:
-    folder_name: str = f"iteration_{i}"
+def make_folder(job_name: str, i: int) -> None:
+    folder_name: str = f"{job_name}_iteration_{i}"
     os.mkdir(folder_name);
     os.chdir(f"./{folder_name}");
 
@@ -104,7 +105,7 @@ def create_combined_fasta() -> None:
 def hmm_search_main(number_of_iterations: int, hmm_file: str, job_name: str) -> None:
     os.chdir("./utilities");
     if not os.path.exists("./TCS"):
-        print("DATABASE NOT FOUND. PLEASE DOWNLOAD DATABASE FROM: https://figshare.com/articles/dataset/TCS_tar_gz/21586065 AND EXTRACT INTO THE UTILITIES FOLDER.");
+        print("DATABASE NOT FOUND. PLEASE DOWNLOAD DATABASE FROM: https://figshare.com/articles/dataset/TCS_tar_gz/21586065 AND EXTRACT INTO THE DATABASES FOLDER.");
         exit();
     else:
         if not os.path.isfile("./combined_eukprot.fasta"):
@@ -112,24 +113,36 @@ def hmm_search_main(number_of_iterations: int, hmm_file: str, job_name: str) -> 
             create_combined_fasta();
         os.chdir("../");
 
-
     if not os.path.exists("./output"):
         os.mkdir("output");
     os.chdir("./output");
-    os.mkdir(job_name);
+    while True:
+        if os.path.exists(f"./{job_name}"):
+            override_job: str = input(f"A job named {job_name} already exists. Would you like to override? (y/n/q): ").lower().strip();
+            if override_job == "y" or override_job == "yes":
+                shutil.rmtree(f"./{job_name}");
+                break;
+            elif override_job== "n" or override_job == "no":
+                new_job_name: str = input(f"Please choose a new name: ");
+                job_name = new_job_name;
+                break;
+            elif override_job == "q" or override_job == "quit":
+                quit();
+            else:
+                print("Invalid response");
+    os.mkdir(job_name);            
+            
     os.chdir(f"./{job_name}");
     current_hmm_file = hmm_file;
     iteration: int = 1;
     while iteration <= 2:
-        make_folder(iteration);
+        make_folder(job_name, iteration);
         # hmm_search(iteration, current_hmm_file, path_to_database);
         # parsed_hmm: dict = parse_hmm_search(i);
         # extract_protein_from_fasta(parsed_hmm, i);
         # hmmalign(i, current_hmm_file);
         # current_hmm_file: str = hmmbuild(i);
-        print(os.getcwd());
         os.chdir("../");
-        print(os.getcwd());
         iteration += 1;
 
     
