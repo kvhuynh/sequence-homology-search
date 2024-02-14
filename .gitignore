@@ -1,3 +1,4 @@
-/sequence-homo-logy-search/TCS/
-/sequence-homology-search/viperin.hmm
+__pycache__/
 *.hmm
+*.DS_Store
+/sequence-homo-logy-search/TCS/
