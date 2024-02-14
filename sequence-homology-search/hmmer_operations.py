@@ -98,48 +98,66 @@ def hmmbuild(i: int) -> str:
     subprocess.run(command, shell=True);
     return f"iteration_{i}.hmm";
 
-def create_combined_fasta() -> None:
-    os.chdir("./TCS");
-    print(os.listdir());
-    # os.chdir("../")
-    print(os.getcwd());
-    # for file in os.listdir():
-    #     print(file);
-
-def hmm_search_main(number_of_iterations: int, hmm_file: str, job_name: str) -> None:
-    os.chdir("./databases");
-    if not os.path.exists("./TCS"):
+def check_database() -> bool:
+    # os.chdir("./databases");
+    if not os.path.exists("./databases/TCS"):
         print("DATABASE NOT FOUND. PLEASE DOWNLOAD DATABASE FROM: https://figshare.com/articles/dataset/TCS_tar_gz/21586065 AND EXTRACT INTO THE DATABASES FOLDER.");
         exit();
     else:
         if not os.path.isfile("./combined_eukprot.fasta"):
             print("Combined eukprot file not found. Creating one...");
-            # create_combined_fasta();
-        os.chdir("../");
+            # os.chdir("../");
+        return False;
+
+def create_output() -> None:
     if not os.path.exists("./output"):
         os.mkdir("output");
-    os.chdir("./output");
-    print(os.getcwd());
+    # os.chdir("./output");
+
+
+def create_combined_fasta() -> None:
+    # create combined file in database folder
+    os.chdir("./databases")
+    with open("combined_eukprot.fasta", "w") as f:
+        print(os.getcwd());
+        for file in os.listdir("./TCS"):
+            with open(f"./TCS/{file}", "r") as f:
+                test = f.readlines();
+                print(test);
+            # print(file);
+        
+    os.chdir("../../");
+
+def create_job(job_name: str) -> None:
     while True:
-        if os.path.exists(f"./{job_name}"):
+        if os.path.exists(f"./output/{job_name}"):
             override_job: str = input(f"A job named {job_name} already exists. Would you like to override? (y/n/q): ").lower().strip();
             if override_job == "y" or override_job == "yes":
-                shutil.rmtree(f"./{job_name}");
-                os.mkdir(job_name);
+                shutil.rmtree(f"./output/{job_name}");
+                os.mkdir(f"./output/{job_name}");
                 break;
             elif override_job== "n" or override_job == "no":
                 new_job_name: str = input(f"Please choose a new name: ");
                 job_name = new_job_name;
-                os.mkdir(job_name);
-                break;
+                continue;
             elif override_job == "q" or override_job == "quit":
                 quit();
             else:
                 print("Invalid response");
         else:
-            os.mkdir(job_name);
-            
-    os.chdir(f"./{job_name}");
+            os.mkdir(f"./output/{job_name}");
+            break;
+    os.chdir(f"./output/{job_name}");
+    return job_name;
+        
+
+def hmm_search_main(number_of_iterations: int, hmm_file: str, job_name: str) -> None:
+    if check_database() == False:
+        # os.chdir("./TCS");
+        create_combined_fasta();
+    print(os.getcwd());
+    create_output();
+    job_name = create_job(job_name);
     current_hmm_file = hmm_file;
     iteration: int = 1;
     while iteration <= 2:

@@ -1,5 +1,6 @@
 __pycache__/
 *.hmm
+*.fasta
 *.DS_Store
 /sequence-homology-search/utilities/TCS/
 /sequence-homology-search/output/
