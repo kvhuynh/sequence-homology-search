@@ -72,30 +72,26 @@ def parse_hmm_search(job_name: str, i: int) -> dict:
     return species_information;
 
 def extract_protein_from_fasta(job_name: str, parsed_hmm: dict, i: int) -> None:
-    # os.chdir("../TCS");
     print(f"Retrieving protein sequences of hits in EukProt database...");
     with open(f"./output/{job_name}/{job_name}_iteration_{i}/{job_name}_iteration_{i}_protein_matches.fasta", "w") as fasta_file:
         for key in parsed_hmm:
             proteins = parsed_hmm[key]["proteins"];
             for file in os.listdir("./databases/TCS"):
-                print(file);
                 file_name: str = file.split("_")[0];
                 if key == file_name:
                     with open(f"./databases/TCS/{file}", "r") as f:
-                        print("here")
                         for record in SeqIO.parse(f, "fasta"):
                             for protein in proteins:
                                 if protein == record.id.split("_")[-1]:
-                                    print(f"MATCH: {protein} {record.id.split('_')[-1]}");
+                                    # print(f"MATCH: {protein} {record.id.split('_')[-1]}");
                                     fasta_file.write(f"> {record.id}\n{record.seq}\n");
 
-def hmmalign(i: int, previous_hmm_iteration: str) -> None:
-    # hmm file from previous iteration
-    os.chdir(f"./iteration_{i}");
-    print(f"Aligning sequences with {previous_hmm_iteration} against iteration_{i}.fasta...");
-    # command: str = f"hmmalign -o aligned_iter_{i}.txt ../hmm_folder/{previous_hmm_iteration} iteration_{i}.fasta";
-    command: str = f"hmmalign -o aligned_iter_{i}.txt ../hmm_folder/PF04055.hmm iteration_{i}.fasta";
-
+def hmmalign(job_name: str, path_to_original_hmm: str, i: int) -> None:
+    # align with original input hmm
+    print(f"Aligning sequences with {path_to_original_hmm} against iteration_{i}.fasta...");
+    output_location: str = f"./output/{job_name}/{job_name}_iteration_{i}/{job_name}_iteration_{i}_aligned.txt";
+    protein_matches: str = f"./output/{job_name}/{job_name}_iteration_{i}/{job_name}_iteration_{i}_protein_matches.fasta";
+    command: str = f"hmmalign -o {output_location} {path_to_original_hmm} {protein_matches}";
     subprocess.run(command, shell=True);
 
 def hmmbuild(i: int) -> str:
@@ -124,8 +120,6 @@ def create_combined_fasta() -> None:
     # create combined file in database folder
     command: str = f"cat ./databases/TCS/*.fasta > ./databases/combined_eukprot.fasta";
     subprocess.run(command, shell=True);
-        
-    # os.chdir("../");
 
 def create_job(job_name: str) -> None:
     while True:
@@ -146,8 +140,6 @@ def create_job(job_name: str) -> None:
         else:
             os.mkdir(f"./output/{job_name}");
             break;
-    # os.chdir(f"../");
-    print(f" asfasdfsadf    {os.getcwd()}");
     return job_name;
         
 
@@ -156,16 +148,17 @@ def hmm_search_main(number_of_iterations: int, hmm_file: str, job_name: str) -> 
         create_combined_fasta();
     create_output();
     job_name = create_job(job_name);
+    path_to_original_hmm = hmm_file;
     current_hmm_file = hmm_file;
     iteration: int = 1;
     while iteration <= 2:
+        common_file_prefix: str = f"./output/{job_name}/{job_name}_iteration_{i}/{job_name}_iteration_{i}";
         make_folder(job_name, iteration);
         hmm_search(current_hmm_file, job_name, iteration);
         parsed_hmm: dict = parse_hmm_search(job_name, iteration);
         extract_protein_from_fasta(job_name, parsed_hmm, iteration);
-        # hmmalign(i, current_hmm_file);
+        hmmalign(job_name, path_to_original_hmm, iteration);
         # current_hmm_file: str = hmmbuild(i);
-        # os.chdir("../");
         iteration += 1;
 
     
