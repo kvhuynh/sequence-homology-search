@@ -99,34 +99,25 @@ def hmmbuild(i: int) -> str:
     return f"iteration_{i}.hmm";
 
 def check_database() -> bool:
-    # os.chdir("./databases");
     if not os.path.exists("./databases/TCS"):
         print("DATABASE NOT FOUND. PLEASE DOWNLOAD DATABASE FROM: https://figshare.com/articles/dataset/TCS_tar_gz/21586065 AND EXTRACT INTO THE DATABASES FOLDER.");
         exit();
     else:
         if not os.path.isfile("./combined_eukprot.fasta"):
             print("Combined eukprot file not found. Creating one...");
-            # os.chdir("../");
         return False;
 
 def create_output() -> None:
     if not os.path.exists("./output"):
         os.mkdir("output");
-    # os.chdir("./output");
-
 
 def create_combined_fasta() -> None:
     # create combined file in database folder
     os.chdir("./databases")
-    with open("combined_eukprot.fasta", "w") as f:
-        print(os.getcwd());
-        for file in os.listdir("./TCS"):
-            with open(f"./TCS/{file}", "r") as f:
-                test = f.readlines();
-                print(test);
-            # print(file);
+    command: str = f"cat ./TCS/*.fasta > combined_eukprot.fasta";
+    subprocess.run(command, shell=True);
         
-    os.chdir("../../");
+    os.chdir("../");
 
 def create_job(job_name: str) -> None:
     while True:
