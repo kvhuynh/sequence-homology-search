@@ -14,9 +14,12 @@ Returns:
   None
 """
 def make_folder(job_name: str, i: int) -> None:
+    print(f"in make_folder {os.getcwd()}");
+    # os.chdir(f"./output/{job_name}");
     folder_name: str = f"{job_name}_iteration_{i}"
-    os.mkdir(folder_name);
-    os.chdir(f"./{folder_name}");
+    os.mkdir(f"./output/{job_name}/{folder_name}");
+    # os.chdir(f"./{folder_name}");
+    # print(os.getcwd());
 
 """
 Runs hmmsearch
@@ -28,11 +31,11 @@ Args:
 Returns:
   None
 """
-def hmm_search(i: int, hmm_file: str, path_to_database: str) -> None:
-    # command: str = f"hmmsearch -E 0.001 --tblout ./run_{i}.txt ../hmm_folder/{hmm_file} ../eukprot_combined.fasta";
-    # print(f"Searching {hmm_file} against EukProt...")
-    # subprocess.run(command, shell=True);
-    pass;
+def hmm_search(hmm_file: str, job_name: str, i: int) -> None:
+    command: str = f"hmmsearch -E 0.001 --tblout ./output/{job_name}/{job_name}_iteration_{i}/{job_name}_iteration_{i}.txt ./{hmm_file} ./databases/combined_eukprot.fasta";
+    print(f"Searching {hmm_file} against EukProt...")
+    subprocess.run(command, shell=True);
+    print(f"Results have been saved to ./output/{job_name}/{job_name}_iteration_{i}/{job_name}_iteration_{i}.txt");
     
 
 
@@ -46,10 +49,10 @@ Args:
 Returns:
   None
 """
-def parse_hmm_search(i: int) -> dict:
+def parse_hmm_search(job_name: str, i: int) -> dict:
     species_information: dict = {};
     print(f"Parsing results of hmmsearch...")
-    with open(f"run_{i}.txt", "r") as input:
+    with open(f"./output/{job_name}/{job_name}_iteration_{i}/{job_name}_iteration_{i}.txt", "r") as input:
         for result in SearchIO.parse(input, "hmmer3-tab"):
             for hit in result:
                 split_file_name: list = hit.id.split("_");
@@ -61,27 +64,30 @@ def parse_hmm_search(i: int) -> dict:
                     if species_information[species]["count"] < 10:
                         species_information[species]["count"] += 1;
                         species_information[species]["proteins"].append(protein_name);
+
+    # ------ testing purposes only ------ #
     with open("test_dict.txt", "w") as f:
         f.write(str(species_information));
+    # ----------------------------------- #   
     return species_information;
 
-def extract_protein_from_fasta(parsed_hmm: dict, i: int) -> None:
-    os.chdir("../TCS");
+def extract_protein_from_fasta(job_name: str, parsed_hmm: dict, i: int) -> None:
+    # os.chdir("../TCS");
     print(f"Retrieving protein sequences of hits in EukProt database...");
-    with open(f"../iteration_{i}/iteration_{i}.fasta", "w") as fasta_file:
+    with open(f"./output/{job_name}/{job_name}_iteration_{i}/{job_name}_iteration_{i}_protein_matches.fasta", "w") as fasta_file:
         for key in parsed_hmm:
             proteins = parsed_hmm[key]["proteins"];
-            for file in os.listdir():
+            for file in os.listdir("./databases/TCS"):
+                print(file);
                 file_name: str = file.split("_")[0];
                 if key == file_name:
-                    with open(file, "r") as f:
+                    with open(f"./databases/TCS/{file}", "r") as f:
+                        print("here")
                         for record in SeqIO.parse(f, "fasta"):
                             for protein in proteins:
-                                # print(record.id.split("_")[-1]);
                                 if protein == record.id.split("_")[-1]:
                                     print(f"MATCH: {protein} {record.id.split('_')[-1]}");
                                     fasta_file.write(f"> {record.id}\n{record.seq}\n");
-    os.chdir("../")
 
 def hmmalign(i: int, previous_hmm_iteration: str) -> None:
     # hmm file from previous iteration
@@ -103,9 +109,12 @@ def check_database() -> bool:
         print("DATABASE NOT FOUND. PLEASE DOWNLOAD DATABASE FROM: https://figshare.com/articles/dataset/TCS_tar_gz/21586065 AND EXTRACT INTO THE DATABASES FOLDER.");
         exit();
     else:
-        if not os.path.isfile("./combined_eukprot.fasta"):
+        if not os.path.isfile("./databases/combined_eukprot.fasta"):
             print("Combined eukprot file not found. Creating one...");
-        return False;
+            return False;
+        else:
+            print("Database file found. ");
+            return True;
 
 def create_output() -> None:
     if not os.path.exists("./output"):
@@ -113,11 +122,10 @@ def create_output() -> None:
 
 def create_combined_fasta() -> None:
     # create combined file in database folder
-    os.chdir("./databases")
-    command: str = f"cat ./TCS/*.fasta > combined_eukprot.fasta";
+    command: str = f"cat ./databases/TCS/*.fasta > ./databases/combined_eukprot.fasta";
     subprocess.run(command, shell=True);
         
-    os.chdir("../");
+    # os.chdir("../");
 
 def create_job(job_name: str) -> None:
     while True:
@@ -138,27 +146,26 @@ def create_job(job_name: str) -> None:
         else:
             os.mkdir(f"./output/{job_name}");
             break;
-    os.chdir(f"./output/{job_name}");
+    # os.chdir(f"../");
+    print(f" asfasdfsadf    {os.getcwd()}");
     return job_name;
         
 
 def hmm_search_main(number_of_iterations: int, hmm_file: str, job_name: str) -> None:
     if check_database() == False:
-        # os.chdir("./TCS");
         create_combined_fasta();
-    print(os.getcwd());
     create_output();
     job_name = create_job(job_name);
     current_hmm_file = hmm_file;
     iteration: int = 1;
     while iteration <= 2:
         make_folder(job_name, iteration);
-        # hmm_search(iteration, current_hmm_file, path_to_database);
-        # parsed_hmm: dict = parse_hmm_search(i);
-        # extract_protein_from_fasta(parsed_hmm, i);
+        hmm_search(current_hmm_file, job_name, iteration);
+        parsed_hmm: dict = parse_hmm_search(job_name, iteration);
+        extract_protein_from_fasta(job_name, parsed_hmm, iteration);
         # hmmalign(i, current_hmm_file);
         # current_hmm_file: str = hmmbuild(i);
-        os.chdir("../");
+        # os.chdir("../");
         iteration += 1;
 
     
