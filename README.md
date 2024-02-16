@@ -1,1 +1,1 @@
-# sequence-homology-search
+# Sequence Homology Search

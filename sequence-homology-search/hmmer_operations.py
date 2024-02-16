@@ -155,7 +155,7 @@ def hmm_search_main(number_of_iterations: int, hmm_file: str, job_name: str) -> 
     path_to_original_hmm = hmm_file;
     current_hmm_file = hmm_file;
     iteration: int = 1;
-    while iteration <= 5:
+    while iteration <= 7:
         common_file_prefix: str = f"./output/{job_name}/{job_name}_iteration_{iteration}/{job_name}_iteration_{iteration}";
         make_folder(job_name, iteration);
         hmm_search(current_hmm_file, common_file_prefix, iteration);
