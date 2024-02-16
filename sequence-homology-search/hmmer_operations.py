@@ -148,10 +148,12 @@ def create_job(job_name: str) -> None:
         
 
 def hmm_search_main(number_of_iterations: int, hmm_file: str, job_name: str) -> None:
+    # ------ should be in main ------ #
     if check_database() == False:
         create_combined_fasta();
     create_output();
     job_name = create_job(job_name);
+    # ------------------------------- #    
     path_to_original_hmm = hmm_file;
     current_hmm_file = hmm_file;
     iteration: int = 1;
