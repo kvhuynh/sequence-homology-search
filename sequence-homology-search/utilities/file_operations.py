@@ -1,7 +1,5 @@
 import os;
-import argparse;
-# from hmmer_operations import hmm_search_main;
-from utilities.cli_operations import *;
+
 
 def create_output() -> None:
     if not os.path.exists("./output"):
@@ -43,9 +41,7 @@ def create_job(job_name: str, phase: str) -> None:
             break;
     return job_name;
 
-# def main():
-#     run_cli();
- 
-if __name__ == "__main__":
-    run_cli();
-    # print(test);
+def create_combined_fasta() -> None:
+    # create combined file in database folder
+    command: str = f"cat ./databases/TCS/*.fasta > ./databases/combined_eukprot.fasta";
+    subprocess.run(command, shell=True);
